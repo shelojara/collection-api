@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package v1;
+
+option go_package = "github.com/shelojara/collection-api/proto/gen/v1;genv1";
+
+service Lists {
+  rpc CreateList(CreateListRequest) returns (List) {}
+}
+
+message List {
+  string id = 1;
+  string name = 2;
+}
+
+message CreateListRequest {
+  string name = 1;
+}
