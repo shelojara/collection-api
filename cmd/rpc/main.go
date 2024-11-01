@@ -18,12 +18,15 @@ func main() {
 	db, err := gorm.Open(
 		postgres.Open("host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"),
 		&gorm.Config{
-			PrepareStmt: true,
+			PrepareStmt:          true,
+			FullSaveAssociations: false,
 		},
 	)
 	if err != nil {
 		panic(err)
 	}
+
+	db = db.Debug()
 
 	logger := slog.Default().With("service", "collection-api")
 
@@ -31,6 +34,10 @@ func main() {
 	mux.Handle(genv1connect.NewListsHandler(&rpc.Lists{DB: db},
 		connect.WithInterceptors(interceptor.NewLoggerInterceptor(logger)),
 	))
+
+	mux.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./proto/openapi/docs.openapi.yaml")
+	})
 
 	http.ListenAndServe("localhost:8000", h2c.NewHandler(mux, &http2.Server{}))
 }

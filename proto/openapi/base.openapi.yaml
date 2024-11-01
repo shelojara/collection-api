@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Collection API
+  description: "Collection API"
+  version: v1.0.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []

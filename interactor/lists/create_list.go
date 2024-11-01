@@ -11,7 +11,7 @@ type CreateList struct {
 	ListRepository port.ListRepository
 }
 
-func (r *CreateList) Execute(req *genv1.CreateListRequest) (*genv1.List, error) {
+func (r *CreateList) Execute(req *genv1.CreateListRequest) (*genv1.CreateListResponse, error) {
 	list := &model.List{
 		ID:   uuid.New().String(),
 		Name: req.Name,
@@ -21,8 +21,7 @@ func (r *CreateList) Execute(req *genv1.CreateListRequest) (*genv1.List, error) 
 		return nil, err
 	}
 
-	return &genv1.List{
-		Id:   list.ID,
-		Name: list.Name,
+	return &genv1.CreateListResponse{
+		Id: list.ID,
 	}, nil
 }

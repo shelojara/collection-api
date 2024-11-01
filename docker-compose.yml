@@ -10,3 +10,12 @@ services:
     image: adminer:latest
     ports:
       - 8080:8080
+
+  studio:
+    image: shelojara/api-studio:beta
+    environment:
+      API_BASE: http://host.docker.internal:8000
+      OPENAPI_URL: http://host.docker.internal:8000/openapi.yaml
+      LOCALHOST_PORT: 8000
+    ports:
+      - 3000:3000

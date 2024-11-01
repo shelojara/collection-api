@@ -2,17 +2,105 @@ syntax = "proto3";
 
 package v1;
 
+import "google/api/annotations.proto";
+
 option go_package = "github.com/shelojara/collection-api/proto/gen/v1;genv1";
 
 service Lists {
-  rpc CreateList(CreateListRequest) returns (List) {}
+  rpc GetList(GetListRequest) returns (List) {
+    option (google.api.http) = {
+      post: "/v1.Lists/GetList"
+      body: "*"
+    };
+  }
+
+  rpc CreateList(CreateListRequest) returns (CreateListResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/CreateList"
+      body: "*"
+    };
+  }
+
+  rpc UpdateList(UpdateListRequest) returns (UpdateListResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/UpdateList"
+      body: "*"
+    };
+  }
+
+  rpc CreateListStatus(CreateListStatusRequest) returns (CreateListStatusResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/CreateListStatus"
+      body: "*"
+    };
+  }
+
+  rpc UpdateListStatus(UpdateListStatusRequest) returns (UpdateListStatusResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/UpdateListStatus"
+      body: "*"
+    };
+  }
 }
 
 message List {
+  message Status {
+    string id = 1;
+    string name = 2;
+  }
+
+  message Item {
+    string id = 1;
+    string name = 2;
+  }
+
   string id = 1;
   string name = 2;
+  string description = 3;
+
+  repeated Status statuses = 4;
+}
+
+message GetListRequest {
+  string id = 1;
 }
 
 message CreateListRequest {
   string name = 1;
+}
+
+message CreateListResponse {
+  string id = 1;
+}
+
+message CreateListStatusRequest {
+  string list_id = 1;
+  string name = 2;
+}
+
+message CreateListStatusResponse {
+  string id = 1;
+}
+
+message UpdateListRequest {
+  string id = 1;
+  repeated string fields = 2;
+
+  string name = 3;
+  string description = 4;
+}
+
+message UpdateListResponse {
+  string id = 1;
+}
+
+message UpdateListStatusRequest {
+  string id = 1;
+  repeated string fields = 2;
+
+  string name = 3;
+}
+
+message UpdateListStatusResponse {
+  string id = 1;
 }

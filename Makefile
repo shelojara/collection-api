@@ -4,6 +4,7 @@ up:
 .PHONY: proto
 proto:
 	cd proto && buf generate
+	cd proto && npx openapi-merge-cli
 
 run: migrate
 	go run cmd/rpc/main.go
