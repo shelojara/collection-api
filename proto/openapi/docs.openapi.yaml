@@ -6,8 +6,57 @@ info:
 security:
   - bearerAuth: []
 tags:
+  - name: Items
   - name: Lists
 paths:
+  /v1.Items/GetItem:
+    post:
+      tags:
+        - Items
+      operationId: Items_GetItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.GetItemRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.Item'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
+  /v1.Items/ImportGame:
+    post:
+      tags:
+        - Items
+      operationId: Items_ImportGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.ImportGameRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.ImportGameResponse'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
   /v1.Lists/CreateList:
     post:
       tags:
@@ -198,10 +247,38 @@ components:
       properties:
         id:
           type: string
+    v1.GetItemRequest:
+      type: object
+      properties:
+        id:
+          type: string
     v1.GetListRequest:
       type: object
       properties:
         id:
+          type: string
+    v1.ImportGameRequest:
+      type: object
+      properties:
+        title:
+          type: string
+    v1.ImportGameResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    v1.Item:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          enum:
+            - KIND_UNSPECIFIED
+            - KIND_GAME
+          type: string
+          format: enum
+        title:
           type: string
     v1.List:
       type: object

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	"github.com/shelojara/collection-api/devops"
 	"github.com/shelojara/collection-api/handler/rpc"
 	"github.com/shelojara/collection-api/handler/rpc/interceptor"
 	"github.com/shelojara/collection-api/proto/gen/v1/genv1connect"
@@ -15,6 +16,8 @@ import (
 )
 
 func main() {
+	config := devops.ReadConfig()
+
 	db, err := gorm.Open(
 		postgres.Open("host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"),
 		&gorm.Config{
@@ -30,10 +33,13 @@ func main() {
 
 	logger := slog.Default().With("service", "collection-api")
 
-	mux := http.NewServeMux()
-	mux.Handle(genv1connect.NewListsHandler(&rpc.Lists{DB: db},
+	opts := []connect.HandlerOption{
 		connect.WithInterceptors(interceptor.NewLoggerInterceptor(logger)),
-	))
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle(genv1connect.NewListsHandler(&rpc.Lists{DB: db, Config: config}, opts...))
+	mux.Handle(genv1connect.NewItemsHandler(&rpc.Items{DB: db, Config: config}, opts...))
 
 	mux.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./proto/openapi/docs.openapi.yaml")

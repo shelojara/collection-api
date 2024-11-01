@@ -11,3 +11,6 @@ run: migrate
 
 migrate:
 	go run cmd/migrate/main.go
+
+secrets:
+	ejson encrypt devops/config.local.json 

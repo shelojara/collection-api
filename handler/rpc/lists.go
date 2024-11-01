@@ -5,6 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/shelojara/collection-api/adapter"
+	"github.com/shelojara/collection-api/devops"
 	"github.com/shelojara/collection-api/interactor/lists"
 	"github.com/shelojara/collection-api/model"
 	genv1 "github.com/shelojara/collection-api/proto/gen/v1"
@@ -15,7 +16,8 @@ import (
 var _ genv1connect.ListsHandler = (*Lists)(nil)
 
 type Lists struct {
-	DB *gorm.DB
+	Config *devops.Config
+	DB     *gorm.DB
 }
 
 func (c *Lists) GetList(ctx context.Context, req *connect.Request[genv1.GetListRequest]) (*connect.Response[genv1.List], error) {
