@@ -59,5 +59,5 @@ func (r *ListRepository) Update(list *model.List, fields []string) error {
 }
 
 func (r *ListRepository) UpdateStatus(status *model.ListStatus, fields []string) error {
-	panic("unimplemented")
+	return r.db.Model(status).Select(fields).Updates(status).Error
 }
