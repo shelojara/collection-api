@@ -37,19 +37,23 @@ const (
 	ItemsGetItemProcedure = "/v1.Items/GetItem"
 	// ItemsImportGameProcedure is the fully-qualified name of the Items's ImportGame RPC.
 	ItemsImportGameProcedure = "/v1.Items/ImportGame"
+	// ItemsSearchItemsProcedure is the fully-qualified name of the Items's SearchItems RPC.
+	ItemsSearchItemsProcedure = "/v1.Items/SearchItems"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	itemsServiceDescriptor          = v1.File_v1_items_proto.Services().ByName("Items")
-	itemsGetItemMethodDescriptor    = itemsServiceDescriptor.Methods().ByName("GetItem")
-	itemsImportGameMethodDescriptor = itemsServiceDescriptor.Methods().ByName("ImportGame")
+	itemsServiceDescriptor           = v1.File_v1_items_proto.Services().ByName("Items")
+	itemsGetItemMethodDescriptor     = itemsServiceDescriptor.Methods().ByName("GetItem")
+	itemsImportGameMethodDescriptor  = itemsServiceDescriptor.Methods().ByName("ImportGame")
+	itemsSearchItemsMethodDescriptor = itemsServiceDescriptor.Methods().ByName("SearchItems")
 )
 
 // ItemsClient is a client for the v1.Items service.
 type ItemsClient interface {
 	GetItem(context.Context, *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.Item], error)
 	ImportGame(context.Context, *connect.Request[v1.ImportGameRequest]) (*connect.Response[v1.ImportGameResponse], error)
+	SearchItems(context.Context, *connect.Request[v1.SearchItemsRequest]) (*connect.Response[v1.SearchItemsResponse], error)
 }
 
 // NewItemsClient constructs a client for the v1.Items service. By default, it uses the Connect
@@ -74,13 +78,20 @@ func NewItemsClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 			connect.WithSchema(itemsImportGameMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		searchItems: connect.NewClient[v1.SearchItemsRequest, v1.SearchItemsResponse](
+			httpClient,
+			baseURL+ItemsSearchItemsProcedure,
+			connect.WithSchema(itemsSearchItemsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // itemsClient implements ItemsClient.
 type itemsClient struct {
-	getItem    *connect.Client[v1.GetItemRequest, v1.Item]
-	importGame *connect.Client[v1.ImportGameRequest, v1.ImportGameResponse]
+	getItem     *connect.Client[v1.GetItemRequest, v1.Item]
+	importGame  *connect.Client[v1.ImportGameRequest, v1.ImportGameResponse]
+	searchItems *connect.Client[v1.SearchItemsRequest, v1.SearchItemsResponse]
 }
 
 // GetItem calls v1.Items.GetItem.
@@ -93,10 +104,16 @@ func (c *itemsClient) ImportGame(ctx context.Context, req *connect.Request[v1.Im
 	return c.importGame.CallUnary(ctx, req)
 }
 
+// SearchItems calls v1.Items.SearchItems.
+func (c *itemsClient) SearchItems(ctx context.Context, req *connect.Request[v1.SearchItemsRequest]) (*connect.Response[v1.SearchItemsResponse], error) {
+	return c.searchItems.CallUnary(ctx, req)
+}
+
 // ItemsHandler is an implementation of the v1.Items service.
 type ItemsHandler interface {
 	GetItem(context.Context, *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.Item], error)
 	ImportGame(context.Context, *connect.Request[v1.ImportGameRequest]) (*connect.Response[v1.ImportGameResponse], error)
+	SearchItems(context.Context, *connect.Request[v1.SearchItemsRequest]) (*connect.Response[v1.SearchItemsResponse], error)
 }
 
 // NewItemsHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -117,12 +134,20 @@ func NewItemsHandler(svc ItemsHandler, opts ...connect.HandlerOption) (string, h
 		connect.WithSchema(itemsImportGameMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	itemsSearchItemsHandler := connect.NewUnaryHandler(
+		ItemsSearchItemsProcedure,
+		svc.SearchItems,
+		connect.WithSchema(itemsSearchItemsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/v1.Items/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ItemsGetItemProcedure:
 			itemsGetItemHandler.ServeHTTP(w, r)
 		case ItemsImportGameProcedure:
 			itemsImportGameHandler.ServeHTTP(w, r)
+		case ItemsSearchItemsProcedure:
+			itemsSearchItemsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -138,4 +163,8 @@ func (UnimplementedItemsHandler) GetItem(context.Context, *connect.Request[v1.Ge
 
 func (UnimplementedItemsHandler) ImportGame(context.Context, *connect.Request[v1.ImportGameRequest]) (*connect.Response[v1.ImportGameResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Items.ImportGame is not implemented"))
+}
+
+func (UnimplementedItemsHandler) SearchItems(context.Context, *connect.Request[v1.SearchItemsRequest]) (*connect.Response[v1.SearchItemsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Items.SearchItems is not implemented"))
 }

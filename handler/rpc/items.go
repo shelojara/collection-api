@@ -2,10 +2,15 @@ package rpc
 
 import (
 	"context"
+	"fmt"
+	"slices"
+	"strings"
 
 	"connectrpc.com/connect"
+	"github.com/agnivade/levenshtein"
 	"github.com/shelojara/collection-api/adapter"
 	"github.com/shelojara/collection-api/devops"
+	"github.com/shelojara/collection-api/handler/rpc/mapper"
 	"github.com/shelojara/collection-api/interactor/items"
 	"github.com/shelojara/collection-api/model"
 	genv1 "github.com/shelojara/collection-api/proto/gen/v1"
@@ -26,10 +31,40 @@ func (c *Items) GetItem(ctx context.Context, req *connect.Request[genv1.GetItemR
 		return nil, err
 	}
 
-	return connect.NewResponse(&genv1.Item{
-		Id:    item.ID,
-		Kind:  genv1.Item_Kind(genv1.Item_Kind_value[string(item.Kind)]),
-		Title: item.Title,
+	return connect.NewResponse(mapper.ItemToProto(item)), nil
+}
+
+func (h *Items) SearchItems(ctx context.Context, req *connect.Request[genv1.SearchItemsRequest]) (*connect.Response[genv1.SearchItemsResponse], error) {
+	db := h.DB.Model(&model.Item{})
+
+	db = db.Where("kind = ?", req.Msg.Kind)
+
+	// search by title using full text search.
+	db = db.Where(`to_tsvector(title) @@ to_tsquery(?)`, strings.Join(strings.Split(req.Msg.Query, " "), " & "))
+
+	// search by title using ILIKE.
+	db = db.Or("title ILIKE ?", fmt.Sprintf("%%%s%%", req.Msg.Query))
+
+	items := make([]*model.Item, 0)
+	if err := db.Limit(20).Find(&items).Error; err != nil {
+		return nil, err
+	}
+
+	// sort by levenshtein distance.
+	slices.SortFunc(items, func(a, b *model.Item) int {
+		ad := levenshtein.ComputeDistance(a.Title, req.Msg.Query)
+		bd := levenshtein.ComputeDistance(b.Title, req.Msg.Query)
+
+		return bd - ad
+	})
+
+	protoItems := make([]*genv1.Item, 0)
+	for _, item := range items {
+		protoItems = append(protoItems, mapper.ItemToProto(item))
+	}
+
+	return connect.NewResponse(&genv1.SearchItemsResponse{
+		Items: protoItems,
 	}), nil
 }
 

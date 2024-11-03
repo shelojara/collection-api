@@ -20,6 +20,13 @@ service Items {
       body: "*"
     };
   }
+
+  rpc SearchItems(SearchItemsRequest) returns (SearchItemsResponse) {
+    option (google.api.http) = {
+      post: "/v1.Items/SearchItems"
+      body: "*"
+    };
+  }
 }
 
 message Item {
@@ -43,4 +50,13 @@ message ImportGameRequest {
 
 message ImportGameResponse {
   string id = 1;
+}
+
+message SearchItemsRequest {
+  Item.Kind kind = 1;
+  string query = 2;
+}
+
+message SearchItemsResponse {
+  repeated Item items = 1;
 }
