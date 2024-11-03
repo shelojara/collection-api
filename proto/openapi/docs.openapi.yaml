@@ -81,6 +81,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/google.rpc.Status'
+  /v1.Lists/CreateListItem:
+    post:
+      tags:
+        - Lists
+      operationId: Lists_CreateListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.CreateListItemRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.CreateListItemResponse'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
   /v1.Lists/CreateListStatus:
     post:
       tags:
@@ -123,6 +147,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/v1.List'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.rpc.Status'
+  /v1.Lists/ListListItems:
+    post:
+      tags:
+        - Lists
+      operationId: Lists_ListListItems
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.ListListItemsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.ListListItemsResponse'
         default:
           description: Default error response
           content:
@@ -225,6 +273,20 @@ components:
         details. You can find out more about this error model and how to work
         with it in the [API Design
         Guide](https://cloud.google.com/apis/design/errors).
+    v1.CreateListItemRequest:
+      type: object
+      properties:
+        listId:
+          type: string
+        itemId:
+          type: string
+        statusId:
+          type: string
+    v1.CreateListItemResponse:
+      type: object
+      properties:
+        id:
+          type: string
     v1.CreateListRequest:
       type: object
       properties:
@@ -293,6 +355,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/v1.List_Status'
+    v1.ListListItemsRequest:
+      type: object
+      properties:
+        listId:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    v1.ListListItemsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/v1.List_Item'
+    v1.List_Item:
+      type: object
+      properties:
+        id:
+          type: string
+        item:
+          $ref: '#/components/schemas/v1.Item'
+        status:
+          $ref: '#/components/schemas/v1.List_Status'
     v1.List_Status:
       type: object
       properties:

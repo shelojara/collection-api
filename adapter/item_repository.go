@@ -19,11 +19,11 @@ func NewItemRepository(db *gorm.DB) *ItemRepository {
 func (r *ItemRepository) Get(q port.ItemQuery) (*model.Item, error) {
 	db := r.db.Model(&model.Item{})
 
-	if q.ByExternalID != "" {
+	if q.ByExternalID != nil {
 		db = db.Where("external_id = ?", q.ByExternalID)
 	}
 
-	if q.ByExternalSource != "" {
+	if q.ByExternalSource != nil {
 		db = db.Where("external_source = ?", q.ByExternalSource)
 	}
 

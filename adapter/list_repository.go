@@ -12,6 +12,10 @@ type ListRepository struct {
 	db *gorm.DB
 }
 
+func NewListRepository(db *gorm.DB) *ListRepository {
+	return &ListRepository{db: db}
+}
+
 func (r *ListRepository) Get(q port.ListQuery) (*model.List, error) {
 	db := r.db.Model(&model.List{})
 
@@ -42,16 +46,16 @@ func (r *ListRepository) GetStatus(q port.ListStatusQuery) (*model.ListStatus, e
 	return status, nil
 }
 
-func NewListRepository(db *gorm.DB) *ListRepository {
-	return &ListRepository{db: db}
-}
-
 func (r *ListRepository) Create(list *model.List) error {
 	return r.db.Create(list).Error
 }
 
 func (r *ListRepository) CreateStatus(status *model.ListStatus) error {
 	return r.db.Create(status).Error
+}
+
+func (r *ListRepository) CreateItem(item *model.ListItem) error {
+	return r.db.Create(item).Error
 }
 
 func (r *ListRepository) Update(list *model.List, fields []string) error {

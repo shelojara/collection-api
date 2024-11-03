@@ -8,6 +8,7 @@ type ListRepository interface {
 
 	Create(list *model.List) error
 	CreateStatus(status *model.ListStatus) error
+	CreateItem(item *model.ListItem) error
 
 	Update(list *model.List, fields []string) error
 	UpdateStatus(status *model.ListStatus, fields []string) error

@@ -3,6 +3,7 @@ syntax = "proto3";
 package v1;
 
 import "google/api/annotations.proto";
+import "v1/items.proto"; 
 
 option go_package = "github.com/shelojara/collection-api/proto/gen/v1;genv1";
 
@@ -10,6 +11,13 @@ service Lists {
   rpc GetList(GetListRequest) returns (List) {
     option (google.api.http) = {
       post: "/v1.Lists/GetList"
+      body: "*"
+    };
+  }
+
+  rpc ListListItems(ListListItemsRequest) returns (ListListItemsResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/ListListItems"
       body: "*"
     };
   }
@@ -41,6 +49,13 @@ service Lists {
       body: "*"
     };
   }
+
+  rpc CreateListItem(CreateListItemRequest) returns (CreateListItemResponse) {
+    option (google.api.http) = {
+      post: "/v1.Lists/CreateListItem"
+      body: "*"
+    };
+  }
 }
 
 message List {
@@ -51,7 +66,8 @@ message List {
 
   message Item {
     string id = 1;
-    string name = 2;
+    v1.Item item = 2;
+    Status status = 3;
   }
 
   string id = 1;
@@ -63,6 +79,17 @@ message List {
 
 message GetListRequest {
   string id = 1;
+}
+
+message ListListItemsRequest {
+  string list_id = 1;
+  int32 offset = 2;
+  int32 limit = 3;
+}
+
+message ListListItemsResponse {
+  int32 total = 1;
+  repeated List.Item items = 2;
 }
 
 message CreateListRequest {
@@ -102,5 +129,15 @@ message UpdateListStatusRequest {
 }
 
 message UpdateListStatusResponse {
+  string id = 1;
+}
+
+message CreateListItemRequest {
+  string list_id = 1;
+  string item_id = 2;
+  string status_id = 3;
+}
+
+message CreateListItemResponse {
   string id = 1;
 }
