@@ -18,8 +18,11 @@ type ListStatus struct {
 }
 
 type ListItem struct {
-	ListID string `gorm:"type:uuid;primaryKey"`
-	ItemID string `gorm:"type:uuid;primaryKey"`
+	ID string `gorm:"type:uuid;primaryKey"`
+
+	ListID string `gorm:"type:uuid;index:idx_list_items_id,unique"`
+	ItemID string `gorm:"type:uuid;index:idx_list_items_id,unique"`
+	Item   Item
 
 	StatusID string `gorm:"type:uuid"`
 	Status   ListStatus

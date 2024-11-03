@@ -12,6 +12,7 @@ type ItemRepository interface {
 }
 
 type ItemQuery struct {
-	ByExternalID     string
-	ByExternalSource string
+	ByID             *string
+	ByExternalID     *string
+	ByExternalSource *string
 }

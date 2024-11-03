@@ -20,9 +20,9 @@ type Lists struct {
 	DB     *gorm.DB
 }
 
-func (c *Lists) GetList(ctx context.Context, req *connect.Request[genv1.GetListRequest]) (*connect.Response[genv1.List], error) {
+func (h *Lists) GetList(ctx context.Context, req *connect.Request[genv1.GetListRequest]) (*connect.Response[genv1.List], error) {
 	var list model.List
-	if err := c.DB.Preload("Statuses").Where("id = ?", req.Msg.Id).Take(&list).Error; err != nil {
+	if err := h.DB.Preload("Statuses").Where("id = ?", req.Msg.Id).Take(&list).Error; err != nil {
 		return nil, err
 	}
 
@@ -39,6 +39,45 @@ func (c *Lists) GetList(ctx context.Context, req *connect.Request[genv1.GetListR
 		Name:        list.Name,
 		Description: list.Description,
 		Statuses:    statuses,
+	}), nil
+}
+
+func (h *Lists) ListListItems(ctx context.Context, req *connect.Request[genv1.ListListItemsRequest]) (*connect.Response[genv1.ListListItemsResponse], error) {
+	db := h.DB.Model(&model.ListItem{})
+	db.Where("list_id = ?", req.Msg.ListId)
+
+	total := int64(0)
+	if err := db.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	listItems := make([]*model.ListItem, 0)
+	if err := db.
+		Preload("Item").Preload("Status").
+		Offset(int(req.Msg.Offset)).Limit(int(req.Msg.Limit)).
+		Find(&listItems).Error; err != nil {
+		return nil, err
+	}
+
+	protoListItems := make([]*genv1.List_Item, 0)
+	for _, listItem := range listItems {
+		protoListItems = append(protoListItems, &genv1.List_Item{
+			Id: listItem.ID,
+			Item: &genv1.Item{
+				Id:    listItem.Item.ID,
+				Kind:  genv1.Item_Kind(genv1.Item_Kind_value[string(listItem.Item.Kind)]),
+				Title: listItem.Item.Title,
+			},
+			Status: &genv1.List_Status{
+				Id:   listItem.Status.ID,
+				Name: listItem.Status.Name,
+			},
+		})
+	}
+
+	return connect.NewResponse(&genv1.ListListItemsResponse{
+		Total: int32(total),
+		Items: protoListItems,
 	}), nil
 }
 
@@ -68,6 +107,15 @@ func (c *Lists) UpdateList(ctx context.Context, req *connect.Request[genv1.Updat
 
 func (c *Lists) UpdateListStatus(ctx context.Context, req *connect.Request[genv1.UpdateListStatusRequest]) (*connect.Response[genv1.UpdateListStatusResponse], error) {
 	res, err := (&lists.UpdateListStatus{
+		ListRepository: adapter.NewListRepository(c.DB),
+	}).Execute(req.Msg)
+
+	return connect.NewResponse(res), err
+}
+
+func (c *Lists) CreateListItem(ctx context.Context, req *connect.Request[genv1.CreateListItemRequest]) (*connect.Response[genv1.CreateListItemResponse], error) {
+	res, err := (&lists.CreateListItem{
+		ItemRepository: adapter.NewItemRepository(c.DB),
 		ListRepository: adapter.NewListRepository(c.DB),
 	}).Execute(req.Msg)
 

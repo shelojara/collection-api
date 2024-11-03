@@ -35,6 +35,8 @@ const (
 const (
 	// ListsGetListProcedure is the fully-qualified name of the Lists's GetList RPC.
 	ListsGetListProcedure = "/v1.Lists/GetList"
+	// ListsListListItemsProcedure is the fully-qualified name of the Lists's ListListItems RPC.
+	ListsListListItemsProcedure = "/v1.Lists/ListListItems"
 	// ListsCreateListProcedure is the fully-qualified name of the Lists's CreateList RPC.
 	ListsCreateListProcedure = "/v1.Lists/CreateList"
 	// ListsUpdateListProcedure is the fully-qualified name of the Lists's UpdateList RPC.
@@ -43,25 +45,31 @@ const (
 	ListsCreateListStatusProcedure = "/v1.Lists/CreateListStatus"
 	// ListsUpdateListStatusProcedure is the fully-qualified name of the Lists's UpdateListStatus RPC.
 	ListsUpdateListStatusProcedure = "/v1.Lists/UpdateListStatus"
+	// ListsCreateListItemProcedure is the fully-qualified name of the Lists's CreateListItem RPC.
+	ListsCreateListItemProcedure = "/v1.Lists/CreateListItem"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
 	listsServiceDescriptor                = v1.File_v1_lists_proto.Services().ByName("Lists")
 	listsGetListMethodDescriptor          = listsServiceDescriptor.Methods().ByName("GetList")
+	listsListListItemsMethodDescriptor    = listsServiceDescriptor.Methods().ByName("ListListItems")
 	listsCreateListMethodDescriptor       = listsServiceDescriptor.Methods().ByName("CreateList")
 	listsUpdateListMethodDescriptor       = listsServiceDescriptor.Methods().ByName("UpdateList")
 	listsCreateListStatusMethodDescriptor = listsServiceDescriptor.Methods().ByName("CreateListStatus")
 	listsUpdateListStatusMethodDescriptor = listsServiceDescriptor.Methods().ByName("UpdateListStatus")
+	listsCreateListItemMethodDescriptor   = listsServiceDescriptor.Methods().ByName("CreateListItem")
 )
 
 // ListsClient is a client for the v1.Lists service.
 type ListsClient interface {
 	GetList(context.Context, *connect.Request[v1.GetListRequest]) (*connect.Response[v1.List], error)
+	ListListItems(context.Context, *connect.Request[v1.ListListItemsRequest]) (*connect.Response[v1.ListListItemsResponse], error)
 	CreateList(context.Context, *connect.Request[v1.CreateListRequest]) (*connect.Response[v1.CreateListResponse], error)
 	UpdateList(context.Context, *connect.Request[v1.UpdateListRequest]) (*connect.Response[v1.UpdateListResponse], error)
 	CreateListStatus(context.Context, *connect.Request[v1.CreateListStatusRequest]) (*connect.Response[v1.CreateListStatusResponse], error)
 	UpdateListStatus(context.Context, *connect.Request[v1.UpdateListStatusRequest]) (*connect.Response[v1.UpdateListStatusResponse], error)
+	CreateListItem(context.Context, *connect.Request[v1.CreateListItemRequest]) (*connect.Response[v1.CreateListItemResponse], error)
 }
 
 // NewListsClient constructs a client for the v1.Lists service. By default, it uses the Connect
@@ -78,6 +86,12 @@ func NewListsClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 			httpClient,
 			baseURL+ListsGetListProcedure,
 			connect.WithSchema(listsGetListMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		listListItems: connect.NewClient[v1.ListListItemsRequest, v1.ListListItemsResponse](
+			httpClient,
+			baseURL+ListsListListItemsProcedure,
+			connect.WithSchema(listsListListItemsMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		createList: connect.NewClient[v1.CreateListRequest, v1.CreateListResponse](
@@ -104,21 +118,34 @@ func NewListsClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 			connect.WithSchema(listsUpdateListStatusMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		createListItem: connect.NewClient[v1.CreateListItemRequest, v1.CreateListItemResponse](
+			httpClient,
+			baseURL+ListsCreateListItemProcedure,
+			connect.WithSchema(listsCreateListItemMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // listsClient implements ListsClient.
 type listsClient struct {
 	getList          *connect.Client[v1.GetListRequest, v1.List]
+	listListItems    *connect.Client[v1.ListListItemsRequest, v1.ListListItemsResponse]
 	createList       *connect.Client[v1.CreateListRequest, v1.CreateListResponse]
 	updateList       *connect.Client[v1.UpdateListRequest, v1.UpdateListResponse]
 	createListStatus *connect.Client[v1.CreateListStatusRequest, v1.CreateListStatusResponse]
 	updateListStatus *connect.Client[v1.UpdateListStatusRequest, v1.UpdateListStatusResponse]
+	createListItem   *connect.Client[v1.CreateListItemRequest, v1.CreateListItemResponse]
 }
 
 // GetList calls v1.Lists.GetList.
 func (c *listsClient) GetList(ctx context.Context, req *connect.Request[v1.GetListRequest]) (*connect.Response[v1.List], error) {
 	return c.getList.CallUnary(ctx, req)
+}
+
+// ListListItems calls v1.Lists.ListListItems.
+func (c *listsClient) ListListItems(ctx context.Context, req *connect.Request[v1.ListListItemsRequest]) (*connect.Response[v1.ListListItemsResponse], error) {
+	return c.listListItems.CallUnary(ctx, req)
 }
 
 // CreateList calls v1.Lists.CreateList.
@@ -141,13 +168,20 @@ func (c *listsClient) UpdateListStatus(ctx context.Context, req *connect.Request
 	return c.updateListStatus.CallUnary(ctx, req)
 }
 
+// CreateListItem calls v1.Lists.CreateListItem.
+func (c *listsClient) CreateListItem(ctx context.Context, req *connect.Request[v1.CreateListItemRequest]) (*connect.Response[v1.CreateListItemResponse], error) {
+	return c.createListItem.CallUnary(ctx, req)
+}
+
 // ListsHandler is an implementation of the v1.Lists service.
 type ListsHandler interface {
 	GetList(context.Context, *connect.Request[v1.GetListRequest]) (*connect.Response[v1.List], error)
+	ListListItems(context.Context, *connect.Request[v1.ListListItemsRequest]) (*connect.Response[v1.ListListItemsResponse], error)
 	CreateList(context.Context, *connect.Request[v1.CreateListRequest]) (*connect.Response[v1.CreateListResponse], error)
 	UpdateList(context.Context, *connect.Request[v1.UpdateListRequest]) (*connect.Response[v1.UpdateListResponse], error)
 	CreateListStatus(context.Context, *connect.Request[v1.CreateListStatusRequest]) (*connect.Response[v1.CreateListStatusResponse], error)
 	UpdateListStatus(context.Context, *connect.Request[v1.UpdateListStatusRequest]) (*connect.Response[v1.UpdateListStatusResponse], error)
+	CreateListItem(context.Context, *connect.Request[v1.CreateListItemRequest]) (*connect.Response[v1.CreateListItemResponse], error)
 }
 
 // NewListsHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -160,6 +194,12 @@ func NewListsHandler(svc ListsHandler, opts ...connect.HandlerOption) (string, h
 		ListsGetListProcedure,
 		svc.GetList,
 		connect.WithSchema(listsGetListMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	listsListListItemsHandler := connect.NewUnaryHandler(
+		ListsListListItemsProcedure,
+		svc.ListListItems,
+		connect.WithSchema(listsListListItemsMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	listsCreateListHandler := connect.NewUnaryHandler(
@@ -186,10 +226,18 @@ func NewListsHandler(svc ListsHandler, opts ...connect.HandlerOption) (string, h
 		connect.WithSchema(listsUpdateListStatusMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	listsCreateListItemHandler := connect.NewUnaryHandler(
+		ListsCreateListItemProcedure,
+		svc.CreateListItem,
+		connect.WithSchema(listsCreateListItemMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/v1.Lists/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ListsGetListProcedure:
 			listsGetListHandler.ServeHTTP(w, r)
+		case ListsListListItemsProcedure:
+			listsListListItemsHandler.ServeHTTP(w, r)
 		case ListsCreateListProcedure:
 			listsCreateListHandler.ServeHTTP(w, r)
 		case ListsUpdateListProcedure:
@@ -198,6 +246,8 @@ func NewListsHandler(svc ListsHandler, opts ...connect.HandlerOption) (string, h
 			listsCreateListStatusHandler.ServeHTTP(w, r)
 		case ListsUpdateListStatusProcedure:
 			listsUpdateListStatusHandler.ServeHTTP(w, r)
+		case ListsCreateListItemProcedure:
+			listsCreateListItemHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -209,6 +259,10 @@ type UnimplementedListsHandler struct{}
 
 func (UnimplementedListsHandler) GetList(context.Context, *connect.Request[v1.GetListRequest]) (*connect.Response[v1.List], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Lists.GetList is not implemented"))
+}
+
+func (UnimplementedListsHandler) ListListItems(context.Context, *connect.Request[v1.ListListItemsRequest]) (*connect.Response[v1.ListListItemsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Lists.ListListItems is not implemented"))
 }
 
 func (UnimplementedListsHandler) CreateList(context.Context, *connect.Request[v1.CreateListRequest]) (*connect.Response[v1.CreateListResponse], error) {
@@ -225,4 +279,8 @@ func (UnimplementedListsHandler) CreateListStatus(context.Context, *connect.Requ
 
 func (UnimplementedListsHandler) UpdateListStatus(context.Context, *connect.Request[v1.UpdateListStatusRequest]) (*connect.Response[v1.UpdateListStatusResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Lists.UpdateListStatus is not implemented"))
+}
+
+func (UnimplementedListsHandler) CreateListItem(context.Context, *connect.Request[v1.CreateListItemRequest]) (*connect.Response[v1.CreateListItemResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("v1.Lists.CreateListItem is not implemented"))
 }

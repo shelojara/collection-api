@@ -9,6 +9,7 @@ import (
 	"github.com/shelojara/collection-api/port"
 	genv1 "github.com/shelojara/collection-api/proto/gen/v1"
 	"github.com/shelojara/collection-api/shared/xerrors"
+	"github.com/shelojara/collection-api/shared/xptr"
 	"gorm.io/gorm"
 )
 
@@ -31,8 +32,8 @@ func (it *ImportGame) Execute(req *genv1.ImportGameRequest) (*genv1.ImportGameRe
 	game := games[0]
 
 	item, err := it.ItemRepository.Get(port.ItemQuery{
-		ByExternalID:     fmt.Sprintf("%d", game.ID),
-		ByExternalSource: "igdb",
+		ByExternalID:     xptr.Ptr(fmt.Sprintf("%d", game.ID)),
+		ByExternalSource: xptr.Ptr("igdb"),
 	})
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
