@@ -39,11 +39,13 @@ func (h *Items) SearchItems(ctx context.Context, req *connect.Request[genv1.Sear
 
 	db = db.Where("kind = ?", req.Msg.Kind)
 
-	// search by title using full text search.
-	db = db.Where(`to_tsvector(title) @@ to_tsquery(?)`, strings.Join(strings.Split(req.Msg.Query, " "), " & "))
-
-	// search by title using ILIKE.
-	db = db.Or("title ILIKE ?", fmt.Sprintf("%%%s%%", req.Msg.Query))
+	db = db.Where(`(
+		to_tsvector(title) @@ to_tsquery(?) OR
+		title ILIKE ?
+	)`,
+		strings.Join(strings.Split(req.Msg.Query, " "), " & "),
+		fmt.Sprintf("%%%s%%", req.Msg.Query),
+	)
 
 	items := make([]*model.Item, 0)
 	if err := db.Limit(20).Find(&items).Error; err != nil {
