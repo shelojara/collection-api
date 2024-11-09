@@ -37,7 +37,16 @@ message Item {
 
   string id = 1;
   Kind kind = 2;
-  string title = 3;
+
+  string external_source = 3;
+  string external_id = 4;
+  string external_url = 5;
+
+  string title = 6;
+  double igdb_rating = 7;
+  double total_rating = 8;
+  string description = 9;
+  string cover_url = 10;
 }
 
 message GetItemRequest {

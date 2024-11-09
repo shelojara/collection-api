@@ -364,7 +364,23 @@ components:
             - KIND_GAME
           type: string
           format: enum
+        externalSource:
+          type: string
+        externalId:
+          type: string
+        externalUrl:
+          type: string
         title:
+          type: string
+        igdbRating:
+          type: number
+          format: double
+        totalRating:
+          type: number
+          format: double
+        description:
+          type: string
+        coverUrl:
           type: string
     v1.List:
       type: object
